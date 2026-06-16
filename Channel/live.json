@@ -3,16 +3,28 @@
     "name": "Live 1",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
-    "url": "https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8"
+    "url": "https://1nyaler.streamhostingcdn.top/stream/32/index.m3u8"
   },
   {
     "name": "Live 2",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
-    "url": "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"
+    "url": "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8"
   },
   {
     "name": "Live 3",
+    "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
+    "category": "Live",
+    "url": "https://rmtv.akamaized.net/hls/live/2043154/rmtv-en-web/bitrate_3.m3u8"
+  },
+  {
+    "name": "Live 4",
+    "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
+    "category": "Live",
+    "url": "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"
+  },
+  {
+    "name": "Live 5",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
     "url": "https://tvsen7.aynaott.com/tsn3/index.m3u8?e=1779283805&u=78be6644-0a65-48ec-81a4-089ac65a2619&token=fd3b5d71227f183da51caba4325cee10"
