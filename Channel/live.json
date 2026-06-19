@@ -1,30 +1,35 @@
 [
   {
     "name": "Live 1",
+    "Channel": "Bein Sprot 1",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
     "url": "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8"
   },
   {
     "name": "Live 2",
+    "Channel": "RTB Go",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
     "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/playlist.m3u8"
   },
   {
     "name": "Live 3",
+    "Channel": "Telemondu",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
     "url": "https://nbculocallive.akamaized.net/hls/live/2037499/puertorico/stream1/master.m3u8"
   },
   {
     "name": "Live 4",
+    "Channel": "Somoy TV",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
-    "url": "https://a62dad94.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/playlist.m3u8"
+    "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8t.m3u8"
   },
   {
     "name": "Live 5",
+    "Channel": "TSN 3",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
     "url": "https://tvsen7.aynaott.com/tsn3/index.m3u8?e=1779283805&u=78be6644-0a65-48ec-81a4-089ac65a2619&token=fd3b5d71227f183da51caba4325cee10"
