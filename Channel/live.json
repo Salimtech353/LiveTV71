@@ -1,17 +1,17 @@
 [
   {
     "name": "Live 1",
-    "Channel": "Bein Sprot 1",
-    "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
-    "category": "Live",
-    "url": "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8"
-  },
-  {
-    "name": "Live 2",
     "Channel": "RTB Go",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
     "url": "https://d1211whpimeups.cloudfront.net/smil:rtbgo/playlist.m3u8"
+  },
+   {
+    "name": "Live 2",
+    "Channel": "Bein Sprot 1",
+    "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
+    "category": "Live",
+    "url": "https://1nyaler.streamhostingcdn.top/stream/23/index.m3u8"
   },
   {
     "name": "Live 3",
@@ -29,9 +29,9 @@
   },
   {
     "name": "Live 5",
-    "Channel": "TSN 3",
+    "Channel": "Z Bangla Sonar",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
-    "url": "https://tvsen7.aynaott.com/tsn3/index.m3u8?e=1779283805&u=78be6644-0a65-48ec-81a4-089ac65a2619&token=fd3b5d71227f183da51caba4325cee10"
+    "url": "https://d1g8wgjurz8via.cloudfront.net/bpk-tv/ColorsHD/default/Zeebanglahd.m3u8325cee10"
   }
 ]
