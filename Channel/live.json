@@ -20,15 +20,22 @@
     "category": "Live",
     "url": "https://nbculocallive.akamaized.net/hls/live/2037499/puertorico/stream1/master.m3u8"
   },
-  {
+   {
     "name": "Live 4",
+    "Channel": "FOX 5",
+    "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
+    "category": "Live",
+    "url": "http://84.17.50.102/fox/index.m3u8"
+  },
+  {
+    "name": "Live 5",
     "Channel": "Somoy TV",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
     "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8"
   },
   {
-    "name": "Live 5",
+    "name": "Live 6",
     "Channel": "Z Bangla Sonar",
     "logo": "https://raw.githubusercontent.com/Salimtech353/LiveTV71/main/Channel/fifa.png",
     "category": "Live",
