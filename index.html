@@ -16,9 +16,10 @@
     .btn-danger { background-color: #dc3545; }
     .btn-danger:hover { background-color: #a71d2a; }
     .hidden { display: none; }
-    .status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; display: none; }
+    .status-msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; display: none; word-break: break-all; }
     .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .link-box { margin-top: 10px; padding: 10px; background: #fff; border: 1px dashed #28a745; border-radius: 6px; }
   </style>
 </head>
 <body>
@@ -37,7 +38,7 @@
 
   <!-- Step 2: Dashboard (Visible after login) -->
   <div id="dashboard-card" class="card hidden">
-    <h3>m3u Input & Replace JSON</h3>
+    <h3>m3u Input & Replace JSON File</h3>
     
     <label>Option 1: M3U Link/URL</label>
     <input type="text" id="m3u-url" placeholder="https://example.com/playlist.m3u">
@@ -47,7 +48,7 @@
     <label>Option 2: Paste M3U Raw Text</label>
     <textarea id="m3u-text" rows="8" placeholder="#EXTM3U&#10;#EXTINF:-1,Channel Name&#10;http://stream.link/live.m3u8"></textarea>
 
-    <button id="btn-process">Generate & Replace JSON</button>
+    <button id="btn-process">Generate & Replace channels.json</button>
     <button id="btn-logout" class="btn-danger">Logout</button>
 
     <div id="status" class="status-msg"></div>
@@ -57,9 +58,9 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // আপনার দেওয়া Firebase Config
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAFi38rpZeaE3YiUYPPGIf1kdN1bmZkeMs",
       authDomain: "iptv-admin-954a5.firebaseapp.com",
@@ -72,7 +73,7 @@
     // Firebase Init
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+    const storage = getStorage(app);
 
     // DOM Elements
     const loginCard = document.getElementById('login-card');
@@ -83,10 +84,10 @@
     const statusDiv = document.getElementById('status');
 
     // Status Helper
-    function showStatus(message, isError = false) {
+    function showStatus(htmlContent, isError = false) {
       statusDiv.style.display = 'block';
       statusDiv.className = 'status-msg ' + (isError ? 'error' : 'success');
-      statusDiv.innerText = message;
+      statusDiv.innerHTML = htmlContent;
     }
 
     // Auth State Observer
@@ -138,7 +139,7 @@
       return playlist;
     }
 
-    // Process & Replace JSON Action
+    // Process & Upload channels.json Action
     btnProcess.addEventListener('click', async () => {
       const url = document.getElementById('m3u-url').value.trim();
       const rawText = document.getElementById('m3u-text').value.trim();
@@ -153,7 +154,7 @@
           if (!response.ok) throw new Error("URL থেকে ফাইল লোড করা যায়নি!");
           m3uData = await response.text();
         } catch (e) {
-          btnProcess.innerText = "Generate & Replace JSON";
+          btnProcess.innerText = "Generate & Replace channels.json";
           showStatus("Error: CORS ব্লক অথবা ভুল লিংক! " + e.message, true);
           return;
         }
@@ -168,25 +169,33 @@
       const jsonResult = parseM3U(m3uData);
 
       if (jsonResult.length === 0) {
-        btnProcess.innerText = "Generate & Replace JSON";
+        btnProcess.innerText = "Generate & Replace channels.json";
         showStatus("কোনো ভ্যালিড m3u চ্যানেল ডাটা পাওয়া যায়নি!", true);
         return;
       }
 
-      btnProcess.innerText = "Uploading to Firestore...";
+      btnProcess.innerText = "Uploading channels.json to Storage...";
 
       try {
-        // 'channels_data' কালেকশনের 'm3u_json' ডকুমেন্টে ডাটা ওভাররাইট করবে
-        await setDoc(doc(db, "channels_data", "m3u_json"), {
-          playlist: jsonResult,
-          updatedAt: new Date().toISOString()
-        });
+        const jsonString = JSON.stringify(jsonResult, null, 2);
+        const storageRef = ref(storage, 'channels.json');
 
-        btnProcess.innerText = "Generate & Replace JSON";
-        showStatus(`সফলভাবে ${jsonResult.length} টি চ্যানেল রিপ্লেস হয়ে Firestore-এ সেভ হয়েছে!`);
+        // Storage-এ channels.json ফাইল ওভাররাইট করবে
+        await uploadString(storageRef, jsonString, 'raw', { contentType: 'application/json' });
+        
+        // পাবলিক ডাউনলোড ইউআরএল জেনারেট করবে
+        const downloadURL = await getDownloadURL(storageRef);
+
+        btnProcess.innerText = "Generate & Replace channels.json";
+        
+        showStatus(`
+          ✅ সফলভাবে ${jsonResult.length} টি চ্যানেল রিপ্লেস হয়ে channels.json তৈরি হয়েছে!<br><br>
+          <b>আপনার channels.json ফাইলের লিংক:</b>
+          <div class="link-box"><a href="${downloadURL}" target="_blank">${downloadURL}</a></div>
+        `);
       } catch (error) {
-        btnProcess.innerText = "Generate & Replace JSON";
-        showStatus("Firestore Error: " + error.message, true);
+        btnProcess.innerText = "Generate & Replace channels.json";
+        showStatus("Firebase Storage Error: " + error.message, true);
       }
     });
   </script>
