@@ -58,9 +58,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // আপনার সঠিক Realtime Database URL সহ Config
     const firebaseConfig = {
       apiKey: "AIzaSyAFi38rpZeaE3YiUYPPGIf1kdN1bmZkeMs",
       authDomain: "iptv-admin-954a5.firebaseapp.com",
@@ -71,20 +70,21 @@
       appId: "1:903898414295:web:d4f84dca135c8af9c70492"
     };
 
-    // Firebase Init
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // DOM Elements
     const loginCard = document.getElementById('login-card');
     const dashboardCard = document.getElementById('dashboard-card');
     const btnLogin = document.getElementById('btn-login');
     const btnLogout = document.getElementById('btn-logout');
     const btnProcess = document.getElementById('btn-process');
     const statusDiv = document.getElementById('status');
+    const m3uUrlInput = document.getElementById('m3u-url');
+    const m3uTextInput = document.getElementById('m3u-text');
 
-    // Status Helper
+    const directJsonUrl = "https://iptv-admin-954a5-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json";
+
     function showStatus(htmlContent, isError = false) {
       statusDiv.style.display = 'block';
       statusDiv.className = 'status-msg ' + (isError ? 'error' : 'success');
@@ -92,10 +92,31 @@
     }
 
     // Auth State Observer
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         loginCard.classList.add('hidden');
         dashboardCard.classList.remove('hidden');
+
+        // ১. সেভ থাকা পুরানো ইনপুট রিলোড করবে
+        if (localStorage.getItem('saved_m3u_url')) {
+          m3uUrlInput.value = localStorage.getItem('saved_m3u_url');
+        }
+
+        // ২. ডাটাবেস থেকে বর্তমান চ্যানেল সংখ্যা চেক করে দেখাবে
+        try {
+          const snapshot = await get(ref(db, 'channels'));
+          if (snapshot.exists()) {
+            const count = snapshot.val().length;
+            showStatus(`
+              ✅ বর্তমানে ডাটাবেসে ${count} টি চ্যানেল সেভ রয়েছে!<br><br>
+              <b>আপনার স্থায়ী channels.json ফাইলের লিংক:</b>
+              <div class="link-box"><a href="${directJsonUrl}" target="_blank">${directJsonUrl}</a></div>
+            `);
+          }
+        } catch (e) {
+          console.log("Error loading DB status", e);
+        }
+
       } else {
         loginCard.classList.remove('hidden');
         dashboardCard.classList.add('hidden');
@@ -103,7 +124,6 @@
       }
     });
 
-    // Login Action
     btnLogin.addEventListener('click', () => {
       const email = document.getElementById('email').value.trim();
       const pass = document.getElementById('password').value.trim();
@@ -117,10 +137,8 @@
         .catch(err => alert("Login Failed: " + err.message));
     });
 
-    // Logout Action
     btnLogout.addEventListener('click', () => signOut(auth));
 
-    // Improved M3U Parser Function (Name, Logo, Category, URL)
     function parseM3U(m3uContent) {
       const lines = m3uContent.split('\n');
       const playlist = [];
@@ -129,19 +147,12 @@
       for (let line of lines) {
         line = line.trim();
         if (line.startsWith('#EXTINF:')) {
-          // Extract Name
           const commaIndex = line.lastIndexOf(',');
-          if (commaIndex !== -1) {
-            currentItem.name = line.substring(commaIndex + 1).trim();
-          } else {
-            currentItem.name = "Unknown Channel";
-          }
+          currentItem.name = commaIndex !== -1 ? line.substring(commaIndex + 1).trim() : "Unknown Channel";
 
-          // Extract Logo (tvg-logo="...")
           const logoMatch = line.match(/tvg-logo="([^"]*)"/i);
           currentItem.logo = logoMatch && logoMatch[1] ? logoMatch[1] : "";
 
-          // Extract Category (group-title="...")
           const categoryMatch = line.match(/group-title="([^"]*)"/i);
           currentItem.category = categoryMatch && categoryMatch[1] ? categoryMatch[1] : "General";
 
@@ -159,10 +170,9 @@
       return playlist;
     }
 
-    // Process & Replace JSON Action
     btnProcess.addEventListener('click', async () => {
-      const url = document.getElementById('m3u-url').value.trim();
-      const rawText = document.getElementById('m3u-text').value.trim();
+      const url = m3uUrlInput.value.trim();
+      const rawText = m3uTextInput.value.trim();
       let m3uData = "";
 
       statusDiv.style.display = 'none';
@@ -173,6 +183,7 @@
           const response = await fetch(url);
           if (!response.ok) throw new Error("URL থেকে ফাইল লোড করা যায়নি!");
           m3uData = await response.text();
+          localStorage.setItem('saved_m3u_url', url); // লিংক ব্রাউজারে সেভ থাকবে
         } catch (e) {
           btnProcess.innerText = "Generate & Replace JSON";
           showStatus("Error: CORS ব্লক অথবা ভুল লিংক! " + e.message, true);
@@ -197,10 +208,7 @@
       btnProcess.innerText = "Updating Realtime Database...";
 
       try {
-        // Realtime Database-এর 'channels' নোডে সম্পূর্ণ নতুন পার্স করা অবজেক্ট সেভ হবে
         await set(ref(db, 'channels'), jsonResult);
-
-        const directJsonUrl = "https://iptv-admin-954a5-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json";
 
         btnProcess.innerText = "Generate & Replace JSON";
         showStatus(`
