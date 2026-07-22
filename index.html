@@ -61,15 +61,17 @@
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     // Realtime Database লিঙ্কসহ সম্পূর্ণ ফায়ারবেস কনফিগ
+        // আপনার সঠিক Realtime Database URL সহ Config
     const firebaseConfig = {
       apiKey: "AIzaSyAFi38rpZeaE3YiUYPPGIf1kdN1bmZkeMs",
       authDomain: "iptv-admin-954a5.firebaseapp.com",
-      databaseURL: "https://iptv-admin-954a5-default-rtdb.firebaseio.com",
+      databaseURL: "https://iptv-admin-954a5-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "iptv-admin-954a5",
       storageBucket: "iptv-admin-954a5.firebasestorage.app",
       messagingSenderId: "903898414295",
       appId: "1:903898414295:web:d4f84dca135c8af9c70492"
     };
+    
 
     // Firebase Init
     const app = initializeApp(firebaseConfig);
@@ -181,8 +183,8 @@
         // Realtime Database-এর 'channels' নোডে ডাটা সেভ হবে
         await set(ref(db, 'channels'), jsonResult);
 
-        const directJsonUrl = "https://iptv-admin-954a5-default-rtdb.firebaseio.com/channels.json";
-
+        const directJsonUrl = "https://iptv-admin-954a5-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json";
+        
         btnProcess.innerText = "Generate & Replace JSON";
         showStatus(`
           ✅ সফলভাবে ${jsonResult.length} টি চ্যানেল সেভ হয়েছে!<br><br>
