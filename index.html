@@ -4,54 +4,257 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IPTV M3U Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; max-width: 650px; margin: 40px auto; padding: 0 20px; background-color: #f4f6f9; }
-    .card { background: white; border: 1px solid #e0e0e0; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    h2, h3 { margin-top: 0; color: #333; }
-    label { font-weight: bold; font-size: 14px; color: #555; }
-    input, button, textarea { width: 100%; padding: 12px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    textarea { resize: vertical; }
-    button { background-color: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
-    button:hover { background-color: #0056b3; }
-    .btn-danger { background-color: #dc3545; }
-    .btn-danger:hover { background-color: #a71d2a; }
-    .hidden { display: none; }
-    .status-msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; display: none; word-break: break-all; }
-    .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .link-box { margin-top: 10px; padding: 10px; background: #fff; border: 1px dashed #28a745; border-radius: 6px; }
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Modern Dark IPTV Background */
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(rgba(10, 15, 30, 0.85), rgba(10, 15, 30, 0.85)), 
+                  url('https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 550px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    /* Glassmorphic Floating Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px;
+      padding: 35px 30px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 
+                  0 5px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-card:hover {
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 123, 255, 0.2);
+    }
+
+    h3 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #00d2ff;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+    }
+
+    label {
+      font-size: 13px;
+      color: #cfd8dc;
+      font-weight: 500;
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 6px;
+    }
+
+    /* Glass Inputs */
+    input[type="text"], 
+    input[type="email"], 
+    input[type="password"], 
+    input[type="file"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus, 
+    input[type="email"]:focus, 
+    input[type="password"]:focus {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #00d2ff;
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+    }
+
+    input::placeholder {
+      color: #a0aec0;
+    }
+
+    /* Modern Buttons */
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 22px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #007bff, #00d2ff);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 210, 255, 0.6);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ff416c, #ff4b2b);
+      box-shadow: 0 4px 15px rgba(255, 65, 108, 0.3);
+      margin-top: 12px;
+    }
+
+    .btn-danger:hover {
+      box-shadow: 0 6px 20px rgba(255, 75, 43, 0.5);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Status Glass Container */
+    .status-msg {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+      word-break: break-all;
+      backdrop-filter: blur(10px);
+    }
+
+    .success {
+      background: rgba(40, 167, 69, 0.2);
+      border: 1px solid rgba(40, 167, 69, 0.5);
+      color: #81c784;
+    }
+
+    .error {
+      background: rgba(220, 53, 69, 0.2);
+      border: 1px solid rgba(220, 53, 69, 0.5);
+      color: #e57373;
+    }
+
+    .link-box {
+      margin-top: 12px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px dashed #00d2ff;
+      border-radius: 8px;
+    }
+
+    .link-box a {
+      color: #00d2ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Radio Group Glass Styling */
+    .radio-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .radio-group label {
+      margin: 0;
+      font-weight: 400;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #e2e8f0;
+    }
+
+    .radio-group input[type="radio"] {
+      accent-color: #00d2ff;
+      cursor: pointer;
+      width: auto;
+    }
+
+    .input-box {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
 
-  <h2>IPTV M3U JSON Admin Panel</h2>
+  <div class="container">
+    <h2>IPTV JSON Admin Panel</h2>
 
-  <!-- Step 1: Login Form -->
-  <div id="login-card" class="card">
-    <h3>Admin Login</h3>
-    <label>Email</label>
-    <input type="email" id="email" placeholder="admin@example.com">
-    <label style="margin-top: 10px; display:block;">Password</label>
-    <input type="password" id="password" placeholder="••••••••">
-    <button id="btn-login">Login</button>
-  </div>
+    <!-- Step 1: Login Form -->
+    <div id="login-card" class="glass-card">
+      <h3>Admin Login</h3>
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="admin@example.com">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••">
+      <button id="btn-login">Login to Dashboard</button>
+    </div>
 
-  <!-- Step 2: Dashboard (Visible after login) -->
-  <div id="dashboard-card" class="card hidden">
-    <h3>m3u Input & Replace JSON</h3>
-    
-    <label>Option 1: M3U Link/URL</label>
-    <input type="text" id="m3u-url" placeholder="https://example.com/playlist.m3u">
+    <!-- Step 2: Dashboard (Visible after login) -->
+    <div id="dashboard-card" class="glass-card hidden">
+      <h3>m3u Input & Replace JSON</h3>
+      
+      <label>Select Input Method:</label>
+      <div class="radio-group">
+        <label>
+          <input type="radio" name="input-type" value="url" checked> M3U Link / URL
+        </label>
+        <label>
+          <input type="radio" name="input-type" value="file"> Upload M3U File
+        </label>
+      </div>
 
-    <p style="text-align: center; margin: 15px 0; color: #777;"><b>— OR —</b></p>
+      <!-- Option 1: URL Input Box -->
+      <div id="url-box" class="input-box">
+        <label>M3U Link/URL</label>
+        <input type="text" id="m3u-url" placeholder="https://example.com/playlist.m3u">
+      </div>
 
-    <label>Option 2: Paste M3U Raw Text</label>
-    <textarea id="m3u-text" rows="8" placeholder="#EXTM3U&#10;#EXTINF:-1 tvg-logo=&quot;http://logo.com/btv.png&quot; group-title=&quot;Bangla&quot;,BTV&#10;http://stream.link/live.m3u8"></textarea>
+      <!-- Option 2: File Upload Box -->
+      <div id="file-box" class="input-box hidden">
+        <label>Upload M3U File (.m3u / .m3u8)</label>
+        <input type="file" id="m3u-file" accept=".m3u,.m3u8,.txt">
+      </div>
 
-    <button id="btn-process">Generate & Replace JSON</button>
-    <button id="btn-logout" class="btn-danger">Logout</button>
+      <button id="btn-process">Generate & Replace JSON</button>
+      <button id="btn-logout" class="btn-danger">Logout</button>
 
-    <div id="status" class="status-msg"></div>
+      <div id="status" class="status-msg"></div>
+    </div>
   </div>
 
   <!-- Firebase JavaScript SDK (v10) -->
@@ -81,9 +284,26 @@
     const btnProcess = document.getElementById('btn-process');
     const statusDiv = document.getElementById('status');
     const m3uUrlInput = document.getElementById('m3u-url');
-    const m3uTextInput = document.getElementById('m3u-text');
+    const m3uFileInput = document.getElementById('m3u-file');
+    
+    const urlBox = document.getElementById('url-box');
+    const fileBox = document.getElementById('file-box');
+    const radioInputs = document.querySelectorAll('input[name="input-type"]');
 
     const directJsonUrl = "https://iptv-admin-954a5-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json";
+
+    // Radio Toggle Logic
+    radioInputs.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'url') {
+          urlBox.classList.remove('hidden');
+          fileBox.classList.add('hidden');
+        } else {
+          fileBox.classList.remove('hidden');
+          urlBox.classList.add('hidden');
+        }
+      });
+    });
 
     function showStatus(htmlContent, isError = false) {
       statusDiv.style.display = 'block';
@@ -91,18 +311,16 @@
       statusDiv.innerHTML = htmlContent;
     }
 
-    // Auth State Observer
+    // Auth Observer
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         loginCard.classList.add('hidden');
         dashboardCard.classList.remove('hidden');
 
-        // ১. সেভ থাকা পুরানো ইনপুট রিলোড করবে
         if (localStorage.getItem('saved_m3u_url')) {
           m3uUrlInput.value = localStorage.getItem('saved_m3u_url');
         }
 
-        // ২. ডাটাবেস থেকে বর্তমান চ্যানেল সংখ্যা চেক করে দেখাবে
         try {
           const snapshot = await get(ref(db, 'channels'));
           if (snapshot.exists()) {
@@ -139,6 +357,7 @@
 
     btnLogout.addEventListener('click', () => signOut(auth));
 
+    // Parser Function
     function parseM3U(m3uContent) {
       const lines = m3uContent.split('\n');
       const playlist = [];
@@ -170,30 +389,44 @@
       return playlist;
     }
 
+    // Process Action
     btnProcess.addEventListener('click', async () => {
+      const selectedType = document.querySelector('input[name="input-type"]:checked').value;
       const url = m3uUrlInput.value.trim();
-      const rawText = m3uTextInput.value.trim();
+      const file = m3uFileInput.files[0];
       let m3uData = "";
 
       statusDiv.style.display = 'none';
 
-      if (url) {
+      if (selectedType === 'file') {
+        if (!file) {
+          showStatus("দয়া করে একটি M3U ফাইল সিলেক্ট করুন!", true);
+          return;
+        }
+        btnProcess.innerText = "Reading File...";
+        try {
+          m3uData = await file.text();
+        } catch (e) {
+          btnProcess.innerText = "Generate & Replace JSON";
+          showStatus("Error: ফাইল রিড করা যায়নি! " + e.message, true);
+          return;
+        }
+      } else {
+        if (!url) {
+          showStatus("দয়া করে M3U লিংক ইনপুট দিন!", true);
+          return;
+        }
         btnProcess.innerText = "Processing URL...";
         try {
           const response = await fetch(url);
           if (!response.ok) throw new Error("URL থেকে ফাইল লোড করা যায়নি!");
           m3uData = await response.text();
-          localStorage.setItem('saved_m3u_url', url); // লিংক ব্রাউজারে সেভ থাকবে
+          localStorage.setItem('saved_m3u_url', url);
         } catch (e) {
           btnProcess.innerText = "Generate & Replace JSON";
           showStatus("Error: CORS ব্লক অথবা ভুল লিংক! " + e.message, true);
           return;
         }
-      } else if (rawText) {
-        m3uData = rawText;
-      } else {
-        showStatus("দয়া করে m3u লিংক অথবা Text ইনপুট দিন!", true);
-        return;
       }
 
       btnProcess.innerText = "Parsing Data...";
@@ -209,6 +442,8 @@
 
       try {
         await set(ref(db, 'channels'), jsonResult);
+
+        m3uFileInput.value = "";
 
         btnProcess.innerText = "Generate & Replace JSON";
         showStatus(`
