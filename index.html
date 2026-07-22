@@ -16,10 +16,9 @@
     .btn-danger { background-color: #dc3545; }
     .btn-danger:hover { background-color: #a71d2a; }
     .hidden { display: none; }
-    .status-msg { margin-top: 15px; padding: 12px; border-radius: 6px; font-weight: bold; text-align: center; display: none; word-break: break-all; }
+    .status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; display: none; }
     .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    .link-box { margin-top: 10px; padding: 10px; background: #fff; border: 1px dashed #28a745; border-radius: 6px; }
   </style>
 </head>
 <body>
@@ -58,13 +57,12 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // আপনার দেওয়া Firebase Config (Realtime Database URL সহ)
+    // আপনার দেওয়া Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAFi38rpZeaE3YiUYPPGIf1kdN1bmZkeMs",
       authDomain: "iptv-admin-954a5.firebaseapp.com",
-      databaseURL: "https://iptv-admin-954a5-default-rtdb.firebaseio.com",
       projectId: "iptv-admin-954a5",
       storageBucket: "iptv-admin-954a5.firebasestorage.app",
       messagingSenderId: "903898414295",
@@ -74,7 +72,7 @@
     // Firebase Init
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app);
+    const db = getFirestore(app);
 
     // DOM Elements
     const loginCard = document.getElementById('login-card');
@@ -85,10 +83,10 @@
     const statusDiv = document.getElementById('status');
 
     // Status Helper
-    function showStatus(htmlContent, isError = false) {
+    function showStatus(message, isError = false) {
       statusDiv.style.display = 'block';
       statusDiv.className = 'status-msg ' + (isError ? 'error' : 'success');
-      statusDiv.innerHTML = htmlContent;
+      statusDiv.innerText = message;
     }
 
     // Auth State Observer
@@ -175,24 +173,20 @@
         return;
       }
 
-      btnProcess.innerText = "Updating Realtime Database...";
+      btnProcess.innerText = "Uploading to Firestore...";
 
       try {
-        // 'channels' নোডে ডাটা সম্পূর্ণ রিপ্লেস করবে
-        await set(ref(db, 'channels'), jsonResult);
-
-        // সরাসরি .json ফাইল লিংক
-        const directJsonUrl = "https://iptv-admin-954a5-default-rtdb.firebaseio.com/channels.json";
+        // 'channels_data' কালেকশনের 'm3u_json' ডকুমেন্টে ডাটা ওভাররাইট করবে
+        await setDoc(doc(db, "channels_data", "m3u_json"), {
+          playlist: jsonResult,
+          updatedAt: new Date().toISOString()
+        });
 
         btnProcess.innerText = "Generate & Replace JSON";
-        showStatus(`
-          ✅ সফলভাবে ${jsonResult.length} টি চ্যানেল রিপ্লেস হয়েছে!<br><br>
-          <b>আপনার স্থায়ী channels.json ফাইলের লিংক:</b>
-          <div class="link-box"><a href="${directJsonUrl}" target="_blank">${directJsonUrl}</a></div>
-        `);
+        showStatus(`সফলভাবে ${jsonResult.length} টি চ্যানেল রিপ্লেস হয়ে Firestore-এ সেভ হয়েছে!`);
       } catch (error) {
         btnProcess.innerText = "Generate & Replace JSON";
-        showStatus("Database Error: " + error.message, true);
+        showStatus("Firestore Error: " + error.message, true);
       }
     });
   </script>
