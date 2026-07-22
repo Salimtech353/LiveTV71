@@ -38,7 +38,7 @@
 
   <!-- Step 2: Dashboard (Visible after login) -->
   <div id="dashboard-card" class="card hidden">
-    <h3>m3u Input & Replace JSON File</h3>
+    <h3>m3u Input & Replace JSON</h3>
     
     <label>Option 1: M3U Link/URL</label>
     <input type="text" id="m3u-url" placeholder="https://example.com/playlist.m3u">
@@ -48,7 +48,7 @@
     <label>Option 2: Paste M3U Raw Text</label>
     <textarea id="m3u-text" rows="8" placeholder="#EXTM3U&#10;#EXTINF:-1,Channel Name&#10;http://stream.link/live.m3u8"></textarea>
 
-    <button id="btn-process">Generate & Replace channels.json</button>
+    <button id="btn-process">Generate & Replace JSON</button>
     <button id="btn-logout" class="btn-danger">Logout</button>
 
     <div id="status" class="status-msg"></div>
@@ -58,12 +58,13 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Firebase Config
+    // আপনার দেওয়া Firebase Config (Realtime Database URL সহ)
     const firebaseConfig = {
       apiKey: "AIzaSyAFi38rpZeaE3YiUYPPGIf1kdN1bmZkeMs",
       authDomain: "iptv-admin-954a5.firebaseapp.com",
+      databaseURL: "https://iptv-admin-954a5-default-rtdb.firebaseio.com",
       projectId: "iptv-admin-954a5",
       storageBucket: "iptv-admin-954a5.firebasestorage.app",
       messagingSenderId: "903898414295",
@@ -73,7 +74,7 @@
     // Firebase Init
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const storage = getStorage(app);
+    const db = getDatabase(app);
 
     // DOM Elements
     const loginCard = document.getElementById('login-card');
@@ -139,7 +140,7 @@
       return playlist;
     }
 
-    // Process & Upload channels.json Action
+    // Process & Replace JSON Action
     btnProcess.addEventListener('click', async () => {
       const url = document.getElementById('m3u-url').value.trim();
       const rawText = document.getElementById('m3u-text').value.trim();
@@ -154,7 +155,7 @@
           if (!response.ok) throw new Error("URL থেকে ফাইল লোড করা যায়নি!");
           m3uData = await response.text();
         } catch (e) {
-          btnProcess.innerText = "Generate & Replace channels.json";
+          btnProcess.innerText = "Generate & Replace JSON";
           showStatus("Error: CORS ব্লক অথবা ভুল লিংক! " + e.message, true);
           return;
         }
@@ -169,33 +170,29 @@
       const jsonResult = parseM3U(m3uData);
 
       if (jsonResult.length === 0) {
-        btnProcess.innerText = "Generate & Replace channels.json";
+        btnProcess.innerText = "Generate & Replace JSON";
         showStatus("কোনো ভ্যালিড m3u চ্যানেল ডাটা পাওয়া যায়নি!", true);
         return;
       }
 
-      btnProcess.innerText = "Uploading channels.json to Storage...";
+      btnProcess.innerText = "Updating Realtime Database...";
 
       try {
-        const jsonString = JSON.stringify(jsonResult, null, 2);
-        const storageRef = ref(storage, 'channels.json');
+        // 'channels' নোডে ডাটা সম্পূর্ণ রিপ্লেস করবে
+        await set(ref(db, 'channels'), jsonResult);
 
-        // Storage-এ channels.json ফাইল ওভাররাইট করবে
-        await uploadString(storageRef, jsonString, 'raw', { contentType: 'application/json' });
-        
-        // পাবলিক ডাউনলোড ইউআরএল জেনারেট করবে
-        const downloadURL = await getDownloadURL(storageRef);
+        // সরাসরি .json ফাইল লিংক
+        const directJsonUrl = "https://iptv-admin-954a5-default-rtdb.firebaseio.com/channels.json";
 
-        btnProcess.innerText = "Generate & Replace channels.json";
-        
+        btnProcess.innerText = "Generate & Replace JSON";
         showStatus(`
-          ✅ সফলভাবে ${jsonResult.length} টি চ্যানেল রিপ্লেস হয়ে channels.json তৈরি হয়েছে!<br><br>
-          <b>আপনার channels.json ফাইলের লিংক:</b>
-          <div class="link-box"><a href="${downloadURL}" target="_blank">${downloadURL}</a></div>
+          ✅ সফলভাবে ${jsonResult.length} টি চ্যানেল রিপ্লেস হয়েছে!<br><br>
+          <b>আপনার স্থায়ী channels.json ফাইলের লিংক:</b>
+          <div class="link-box"><a href="${directJsonUrl}" target="_blank">${directJsonUrl}</a></div>
         `);
       } catch (error) {
-        btnProcess.innerText = "Generate & Replace channels.json";
-        showStatus("Firebase Storage Error: " + error.message, true);
+        btnProcess.innerText = "Generate & Replace JSON";
+        showStatus("Database Error: " + error.message, true);
       }
     });
   </script>
