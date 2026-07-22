@@ -46,7 +46,7 @@
     <p style="text-align: center; margin: 15px 0; color: #777;"><b>— OR —</b></p>
 
     <label>Option 2: Paste M3U Raw Text</label>
-    <textarea id="m3u-text" rows="8" placeholder="#EXTM3U&#10;#EXTINF:-1,Channel Name&#10;http://stream.link/live.m3u8"></textarea>
+    <textarea id="m3u-text" rows="8" placeholder="#EXTM3U&#10;#EXTINF:-1 tvg-logo=&quot;http://logo.com/btv.png&quot; group-title=&quot;Bangla&quot;,BTV&#10;http://stream.link/live.m3u8"></textarea>
 
     <button id="btn-process">Generate & Replace JSON</button>
     <button id="btn-logout" class="btn-danger">Logout</button>
@@ -60,8 +60,7 @@
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Realtime Database লিঙ্কসহ সম্পূর্ণ ফায়ারবেস কনফিগ
-        // আপনার সঠিক Realtime Database URL সহ Config
+    // আপনার সঠিক Realtime Database URL সহ Config
     const firebaseConfig = {
       apiKey: "AIzaSyAFi38rpZeaE3YiUYPPGIf1kdN1bmZkeMs",
       authDomain: "iptv-admin-954a5.firebaseapp.com",
@@ -71,7 +70,6 @@
       messagingSenderId: "903898414295",
       appId: "1:903898414295:web:d4f84dca135c8af9c70492"
     };
-    
 
     // Firebase Init
     const app = initializeApp(firebaseConfig);
@@ -122,7 +120,7 @@
     // Logout Action
     btnLogout.addEventListener('click', () => signOut(auth));
 
-    // M3U Parser Function
+    // Improved M3U Parser Function (Name, Logo, Category, URL)
     function parseM3U(m3uContent) {
       const lines = m3uContent.split('\n');
       const playlist = [];
@@ -131,11 +129,30 @@
       for (let line of lines) {
         line = line.trim();
         if (line.startsWith('#EXTINF:')) {
-          const parts = line.split(',');
-          currentItem.name = parts[1] ? parts[1].trim() : "Unknown Channel";
+          // Extract Name
+          const commaIndex = line.lastIndexOf(',');
+          if (commaIndex !== -1) {
+            currentItem.name = line.substring(commaIndex + 1).trim();
+          } else {
+            currentItem.name = "Unknown Channel";
+          }
+
+          // Extract Logo (tvg-logo="...")
+          const logoMatch = line.match(/tvg-logo="([^"]*)"/i);
+          currentItem.logo = logoMatch && logoMatch[1] ? logoMatch[1] : "";
+
+          // Extract Category (group-title="...")
+          const categoryMatch = line.match(/group-title="([^"]*)"/i);
+          currentItem.category = categoryMatch && categoryMatch[1] ? categoryMatch[1] : "General";
+
         } else if (line && !line.startsWith('#')) {
           currentItem.url = line;
-          playlist.push(currentItem);
+          playlist.push({
+            name: currentItem.name || "Unknown Channel",
+            logo: currentItem.logo || "",
+            category: currentItem.category || "General",
+            url: currentItem.url
+          });
           currentItem = {};
         }
       }
@@ -180,14 +197,14 @@
       btnProcess.innerText = "Updating Realtime Database...";
 
       try {
-        // Realtime Database-এর 'channels' নোডে ডাটা সেভ হবে
+        // Realtime Database-এর 'channels' নোডে সম্পূর্ণ নতুন পার্স করা অবজেক্ট সেভ হবে
         await set(ref(db, 'channels'), jsonResult);
 
         const directJsonUrl = "https://iptv-admin-954a5-default-rtdb.asia-southeast1.firebasedatabase.app/channels.json";
-        
+
         btnProcess.innerText = "Generate & Replace JSON";
         showStatus(`
-          ✅ সফলভাবে ${jsonResult.length} টি চ্যানেল সেভ হয়েছে!<br><br>
+          ✅ সফলভাবে ${jsonResult.length} টি চ্যানেল নতুন স্ট্রাকচারে সেভ হয়েছে!<br><br>
           <b>আপনার স্থায়ী channels.json ফাইলের লিংক:</b>
           <div class="link-box"><a href="${directJsonUrl}" target="_blank">${directJsonUrl}</a></div>
         `);
