@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPTV M3U Admin Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 650px; margin: 40px auto; padding: 0 20px; background-color: #f4f6f9; }
+    .card { background: white; border: 1px solid #e0e0e0; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    h2, h3 { margin-top: 0; color: #333; }
+    label { font-weight: bold; font-size: 14px; color: #555; }
+    input, button, textarea { width: 100%; padding: 12px; margin-top: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    textarea { resize: vertical; }
+    button { background-color: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
+    button:hover { background-color: #0056b3; }
+    .btn-danger { background-color: #dc3545; }
+    .btn-danger:hover { background-color: #a71d2a; }
+    .hidden { display: none; }
+    .status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; font-weight: bold; text-align: center; display: none; }
+    .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  </style>
+</head>
+<body>
+
+  <h2>IPTV M3U JSON Admin Panel</h2>
+
+  <!-- Step 1: Login Form -->
+  <div id="login-card" class="card">
+    <h3>Admin Login</h3>
+    <label>Email</label>
+    <input type="email" id="email" placeholder="admin@example.com">
+    <label style="margin-top: 10px; display:block;">Password</label>
+    <input type="password" id="password" placeholder="••••••••">
+    <button id="btn-login">Login</button>
+  </div>
+
+  <!-- Step 2: Dashboard (Visible after login) -->
+  <div id="dashboard-card" class="card hidden">
+    <h3>m3u Input & Replace JSON</h3>
+    
+    <label>Option 1: M3U Link/URL</label>
+    <input type="text" id="m3u-url" placeholder="https://example.com/playlist.m3u">
+
+    <p style="text-align: center; margin: 15px 0; color: #777;"><b>— OR —</b></p>
+
+    <label>Option 2: Paste M3U Raw Text</label>
+    <textarea id="m3u-text" rows="8" placeholder="#EXTM3U&#10;#EXTINF:-1,Channel Name&#10;http://stream.link/live.m3u8"></textarea>
+
+    <button id="btn-process">Generate & Replace JSON</button>
+    <button id="btn-logout" class="btn-danger">Logout</button>
+
+    <div id="status" class="status-msg"></div>
+  </div>
+
+  <!-- Firebase JavaScript SDK (v10) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // আপনার দেওয়া Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFi38rpZeaE3YiUYPPGIf1kdN1bmZkeMs",
+      authDomain: "iptv-admin-954a5.firebaseapp.com",
+      projectId: "iptv-admin-954a5",
+      storageBucket: "iptv-admin-954a5.firebasestorage.app",
+      messagingSenderId: "903898414295",
+      appId: "1:903898414295:web:d4f84dca135c8af9c70492"
+    };
+
+    // Firebase Init
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // DOM Elements
+    const loginCard = document.getElementById('login-card');
+    const dashboardCard = document.getElementById('dashboard-card');
+    const btnLogin = document.getElementById('btn-login');
+    const btnLogout = document.getElementById('btn-logout');
+    const btnProcess = document.getElementById('btn-process');
+    const statusDiv = document.getElementById('status');
+
+    // Status Helper
+    function showStatus(message, isError = false) {
+      statusDiv.style.display = 'block';
+      statusDiv.className = 'status-msg ' + (isError ? 'error' : 'success');
+      statusDiv.innerText = message;
+    }
+
+    // Auth State Observer
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginCard.classList.add('hidden');
+        dashboardCard.classList.remove('hidden');
+      } else {
+        loginCard.classList.remove('hidden');
+        dashboardCard.classList.add('hidden');
+        statusDiv.style.display = 'none';
+      }
+    });
+
+    // Login Action
+    btnLogin.addEventListener('click', () => {
+      const email = document.getElementById('email').value.trim();
+      const pass = document.getElementById('password').value.trim();
+
+      if (!email || !pass) {
+        alert("ইমেইল এবং পাসওয়ার্ড দিন!");
+        return;
+      }
+
+      signInWithEmailAndPassword(auth, email, pass)
+        .catch(err => alert("Login Failed: " + err.message));
+    });
+
+    // Logout Action
+    btnLogout.addEventListener('click', () => signOut(auth));
+
+    // M3U Parser Function
+    function parseM3U(m3uContent) {
+      const lines = m3uContent.split('\n');
+      const playlist = [];
+      let currentItem = {};
+
+      for (let line of lines) {
+        line = line.trim();
+        if (line.startsWith('#EXTINF:')) {
+          const parts = line.split(',');
+          currentItem.name = parts[1] ? parts[1].trim() : "Unknown Channel";
+        } else if (line && !line.startsWith('#')) {
+          currentItem.url = line;
+          playlist.push(currentItem);
+          currentItem = {};
+        }
+      }
+      return playlist;
+    }
+
+    // Process & Replace JSON Action
+    btnProcess.addEventListener('click', async () => {
+      const url = document.getElementById('m3u-url').value.trim();
+      const rawText = document.getElementById('m3u-text').value.trim();
+      let m3uData = "";
+
+      statusDiv.style.display = 'none';
+
+      if (url) {
+        btnProcess.innerText = "Processing URL...";
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("URL থেকে ফাইল লোড করা যায়নি!");
+          m3uData = await response.text();
+        } catch (e) {
+          btnProcess.innerText = "Generate & Replace JSON";
+          showStatus("Error: CORS ব্লক অথবা ভুল লিংক! " + e.message, true);
+          return;
+        }
+      } else if (rawText) {
+        m3uData = rawText;
+      } else {
+        showStatus("দয়া করে m3u লিংক অথবা Text ইনপুট দিন!", true);
+        return;
+      }
+
+      btnProcess.innerText = "Parsing Data...";
+      const jsonResult = parseM3U(m3uData);
+
+      if (jsonResult.length === 0) {
+        btnProcess.innerText = "Generate & Replace JSON";
+        showStatus("কোনো ভ্যালিড m3u চ্যানেল ডাটা পাওয়া যায়নি!", true);
+        return;
+      }
+
+      btnProcess.innerText = "Uploading to Firestore...";
+
+      try {
+        // 'channels_data' কালেকশনের 'm3u_json' ডকুমেন্টে ডাটা ওভাররাইট করবে
+        await setDoc(doc(db, "channels_data", "m3u_json"), {
+          playlist: jsonResult,
+          updatedAt: new Date().toISOString()
+        });
+
+        btnProcess.innerText = "Generate & Replace JSON";
+        showStatus(`সফলভাবে ${jsonResult.length} টি চ্যানেল রিপ্লেস হয়ে Firestore-এ সেভ হয়েছে!`);
+      } catch (error) {
+        btnProcess.innerText = "Generate & Replace JSON";
+        showStatus("Firestore Error: " + error.message, true);
+      }
+    });
+  </script>
+</body>
+</html>
