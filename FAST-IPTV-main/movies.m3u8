@@ -6,6 +6,19 @@
 
 #EXTM3U
 
+#EXTINF:-1 group-title="OTT Movies Series" tvg-logo="https://image.tmdb.org/t/p/w500/81182352824.jpg", Spider-Man: Brand New Day (2026)
+https://play.movielinkbd.mom/watch/FxSg_395OIZMoCjd.NC_2bgZuTL_p954sNEnAYkdtGi-ishCdtE9Xx3S0gy7ZVnvB2uDFjVicydCtsPHIf4adfuSD5aGy.Xlu_ThPhc3qJ_OXEzeGK3Q
+
+#EXTINF:-1 group-title="OTT Movies Series" tvg-logo="https://image.tmdb.org/t/p/w500/81182352824.jpg", 2.Spider-Man: Brand New Day (2026)
+https://pub-87e02c2f0e8941be964da8513404e392.r2.dev/CINEFREAK.TOP%20-%20Spider-Man%20Brand%20New%20Day%20%282026%29%20HDTC-V3%20%5BHindi%20LiNE-English%5D%20720p%20HC-ESub.mkv
+
+#EXTINF:-1 group-title="OTT Movies Series" tvg-logo="https://image.tmdb.org/t/p/w500/5ewrnKp4TboU4hTLT5cWO350mHj.jpg", Avatar 3
+https://play.movielinkbd.mom/watch/DsE5rYkB1lZPI9Va.HmPsI-CK5RuUICcOvebannqWQVCo_d5I50bRfBm-c4suFqXIZuuZgumZ_iS9YvSV6YPIBpq_RF7M.lmE-czkUmtv9xu74ZG8JlA
+
+#EXTINF:-1 group-title="OTT Movies Series" tvg-logo="https://image.tmdb.org/t/p/w500/9kF1W7J90vK305t9qN59iZ61n3E.jpg", Total Dadagiri
+https://play.movielinkbd.mom/watch/T_rvv47BKT3dmjFr.IXkqTy-EmYyDQSYz8cUA6q-S_MRYi7_J3UdQWQMACpbB1aa2VWDSjSswXlE95FaBDkoAS_7MiGpFbDuu-KbZM0kTj3uApXnpcdFfFyz6PjxZhn9KjU6Cm-SNUVxyPGmBgcV3HAqRt0wGNLrJeRXguLdPD0ZxsUGAV52PTw.TzLRZJMerGWq3XYKgI7Dsg
+
+
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="https://m.media-amazon.com/images/M/MV5BZWE1OTg5ZDMtYjllZC00YzE2LTg1N2UtZmI0OTBmMWE3NzFkXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" group-title="Hindi Movies",Hai Jawani Toh Ishq Hona Hai
 https://fmftp.net/api/stream/video/stream?type=movies&id=20935
 #EXTINF:-1 tvg-id="" tvg-name="" tvg-logo="https://m.media-amazon.com/images/M/MV5BNzIwMzcwNzEtYzU4ZS00ZjhjLWFlYTAtMzc4Y2RjMDFjNDNlXkEyXkFqcGc@._V1_.jpg" group-title="Hindi Movies",Chand Mera Dil
